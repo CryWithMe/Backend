@@ -1,0 +1,7 @@
+
+version: '3'
+services:
+  rust-rest-api-server:
+    build: .
+    ports: 
+        - 8000:8000
