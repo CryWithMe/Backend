@@ -4,7 +4,7 @@
 
 #[get("/")]
 fn index() -> &'static str {
-    "Hello, world!"
+    "Hello, Cry Babies!"
 }
 fn main() {
     rocket::ignite().mount("/", routes![index]).launch();
