@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+    api-server:
+        build: ./api-server
+        restart: always
+        ports:
+            - 443:443
+        volumes:
+            - ./api-server:/usr/src/app
+    postgres:
+        build: ./postgres
+        restart: always
+        environment: 
+            POSTGRES_PASSWORD: "apple"
+        ports:
+            - 5432:5432
+
+        
