@@ -18,8 +18,11 @@ services:
         restart: always
         environment: 
             POSTGRES_PASSWORD: "apple"
+            POSTGRES_DB: "crydb"
         ports:
             - 5432:5432
+        volumes:
+            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     redis:
         build: ./redis/
 
