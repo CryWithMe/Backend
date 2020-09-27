@@ -8,6 +8,10 @@ const bodyParser = require("body-parser")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+const encryption = require("./models/Encryption");
+const session = require("./ourSession");
+session.init(app);
+const account = require("./account");
 
 //Uses Rama Node Logger
 //MIT Liscence
@@ -33,3 +37,5 @@ app.get("/",function(req,res){
 app.listen(443, () => {
     logger.info(`Listening to requests on 443`);
 });
+
+account.init(app);

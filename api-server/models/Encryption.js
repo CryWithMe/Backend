@@ -5,7 +5,9 @@
 // The salt will then be appended onto the password and then it will be encrypted using SHA-256
 
 // This function is copy and pasted SHA256 it is correct, but I don't understand it DO NOT TOUCH
-function SHA256(s){
+
+
+exports.SHA256 = function(s){
     var chrsz = 8;
     var hexcase = 0;
 
@@ -122,71 +124,27 @@ function SHA256(s){
     return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
 }
 
-class EncryptObject{
-
-    //Constructor takes password and salt
-    constructor(p, s){
-
-        // sets password to the passed in variable
-        this.password = p;
-
-        // if the salt is empty it creates a salt
-        if (s == ""){
-            this.createSalt(64-(this.password.length));
-        }
-
-        // else it sets the objects salt to passed salt
-        else{
-            this.salt = s;
-        }
-        this.saltedPassword = this.salt + this.password;
-    }
-
-    // set Password
-    setPassword(temp_password){
-        this.password = temp_password;
-    }
-
-    // set Salt
-    setSalt(temp_salt){
-        this.salt = temp_salt;
-    }
-
-    // returns password
-    getPassword(){
-        return this.password;
-    }
-
     // returns salt
-    getSalt(){
-        return this.salt;
-    }
+exports.getSalt =function(){
+    console.log(createSalt(32))
+    return createSalt(32);
+}
 
     //get the salted password
-    getSaltedPassword(){
-        return this.saltedPassword;
-    }
+exports.getHash = function(salt, password){
+    return exports.SHA256(salt+password);
+}
 
     // creates salt from a random sequence of the 'characters' variable to the length passed in
-    createSalt(length){
-        var result = '';
-        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var charactersLength = characters.length;
-        for ( var i = 0; i < length; i++ ) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        this.salt = result;
+function createSalt(length){
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
-
-    // returns hashed function
-    getHash(myString){
-        return SHA256(myString);
-    }
-};
+    return result
+}
 
 
 
-const E = new EncryptObject("ass", "salt");
-console.log(E.getPassword());
-console.log(E.getSalt());
-console.log(E.getHash(E.getSaltedPassword()));

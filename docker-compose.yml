@@ -8,6 +8,11 @@ services:
             - 443:443
         volumes:
             - ./api-server:/usr/src/app
+        links:
+            - redis
+        environment: 
+            - REDIS_URL=redis://cache
+            - REDIS_PASSWORD=Banana
     postgres:
         build: ./postgres
         restart: always
@@ -15,5 +20,14 @@ services:
             POSTGRES_PASSWORD: "apple"
         ports:
             - 5432:5432
+    redis:
+        build: ./redis/
+
+        environment:
+            - REDIS_PASSWORD=Banana
+        command: redis-server --requirepass Banana
+        container_name: cache
+        expose:
+            - 6379
 
         
