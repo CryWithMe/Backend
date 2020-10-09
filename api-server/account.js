@@ -4,9 +4,7 @@ const encryption = require("./models/Encryption");
 const pool = require("./pool").pool;
 const logger = require("@rama41222/node-logger/src/logger");
 const {v4} = require("uuid");
-function validatePassword(username, password){
-    return 12;
-}
+
 
 exports.init = function(app){
     app.post("/login",function(req, res){
