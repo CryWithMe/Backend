@@ -28,7 +28,9 @@ exports.init = function(app){
                                     res.sendStatus(400);
                                 } else {
                                     if(result.rows[0] && result.rows[0].hash == encryption.getHash(result.rows[0].salt, req.body.password)){
-                                        req.session.accountId = result.rows[0].accountId;
+                                        
+                                        req.session.accountId = result.rows[0].id;
+                                        
                                         res.sendStatus(200);
                                     } else {
                                         res.sendStatus(401);
@@ -57,6 +59,16 @@ exports.init = function(app){
 
 
     });
+
+    app.post("/logout", function(req,res){
+        
+        if(req.session.accountId){
+            req.session.accountId = null;
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(401);
+        }
+    })
 
     app.post("/createAccount", function(req,res){
 
@@ -93,14 +105,17 @@ exports.init = function(app){
                             else{
                                 
                                 client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [accountId, salt,hash], (err,result)=>{
-                                    release()
+                                    
                                     if(err){
                                         console.log(err);
                                         res.sendStatus(400)
                                     } else{
+                                        
                                         req.session.accountId = accountId;
+                                        
                                         res.sendStatus(200);
                                     }
+                                    release()
                                 });
                             }
                         });
