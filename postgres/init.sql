@@ -5,7 +5,6 @@ CREATE TABLE Account(
     fname varchar(30),
     lname varchar(30),
     email varchar(320),
-    creationDate TIMESTAMP,
     lastUpdateDate TIMESTAMP
 );
 
