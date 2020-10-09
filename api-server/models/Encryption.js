@@ -126,7 +126,7 @@ exports.SHA256 = function(s){
 
     // returns salt
 exports.getSalt =function(){
-    console.log(createSalt(32))
+    
     return createSalt(32);
 }
 

@@ -13,6 +13,9 @@ services:
         environment: 
             - REDIS_URL=redis://cache
             - REDIS_PASSWORD=Banana
+            - PGUSER=cryapi
+            - PGDATABASE=crydb
+            - PGPASSWORD=apple
     postgres:
         build: ./postgres
         restart: always
