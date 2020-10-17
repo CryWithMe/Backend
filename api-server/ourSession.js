@@ -21,6 +21,6 @@ exports.init = function(app){
         secret:"Taco Bell Secret Sauce",
         store: new redisStore({host: process.env.REDIS_URL, port: 6379, client: client}),
         saveUninitialized: false,
-        resave: false
+        resave: true
     }));
 }
