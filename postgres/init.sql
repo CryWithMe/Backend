@@ -14,4 +14,11 @@ CREATE TABLE Login(
     salt varchar(32),
     hash varchar(64),
     lastUpdateDate TIMESTAMP
+);
+
+CREATE TABLE FriendList(
+    sender VARCHAR(36),
+    recipient VARCHAR(36),
+    state varchar(20),
+    lastUpdateDate TIMESTAMP
 )

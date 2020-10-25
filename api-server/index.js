@@ -13,6 +13,7 @@ const session = require("./ourSession");
 session.init(app);
 const account = require("./account");
 
+
 //Uses Rama Node Logger
 //MIT Liscence
 const { log, ExpressAPILogMiddleware } = require('@rama41222/node-logger');
@@ -28,7 +29,7 @@ app.use(cors({
 const logger = log({ label: 'user-service' , console: true, file: true });
 
 
-app.get("/",function(req,res){
+app.get("/", function(req,res){
     res.status(200).send("Cry With Me API is up and running");
     
 });
@@ -39,3 +40,5 @@ app.listen(443, () => {
 });
 
 account.init(app);
+
+require("./friendList").init(app);
