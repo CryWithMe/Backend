@@ -21,4 +21,39 @@ CREATE TABLE FriendList(
     recipient VARCHAR(36),
     state varchar(20),
     lastUpdateDate TIMESTAMP
-)
+);
+
+CREATE TABLE Event(
+    sender VARCHAR(36),
+    eventID VARCHAR(36),
+    type VARCHAR(20),
+    date TIMESTAMP
+);
+
+CREATE TABLE Response(
+    responder VARCHAR(36),
+    eventID VARCHAR(36),
+    responseID VARCHAR(36),
+    type VARCHAR(36),
+    date TIMESTAMP
+);
+
+CREATE TABLE Bio(
+    id VARCHAR(36),
+    text TEXT,
+    lastUpdateDate TIMESTAMP
+);
+
+CREATE TABLE Condition(
+    id VARCHAR(36),
+    condition TEXT,
+    active BOOLEAN,
+    lastUpdateDate TIMESTAMP
+);
+
+CREATE TABLE Push(
+    id VARCHAR(36),
+    pushtoken VARCHAR(36),
+    active BOOLEAN,
+    lastUpdateDate date
+);
