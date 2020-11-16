@@ -143,4 +143,55 @@ exports.init = function(app){
         }
 
     })
+
+    //Route to Deny a friend request
+    app.post("/denyFriendRequest", (req,res) => {
+        //Seeing if they have an account id and username
+        if(!req.session.accountId && req.body.username){
+            res.sendStatus(400)
+        } else {
+            pool.connect( (err,client,release) =>{
+                if(err){
+                    res.sendStatus(500);
+                } else{
+
+                    //Seeing if there is a pending friend request
+                    client.query(`SELECT COUNT(X) FROM friendlist
+                                    JOIN (
+                                        SELECT sender,max(lastupdatedate) 
+                                            FROM friendlist WHERE recipient = $1
+                                            GROUP BY SENDER) 
+                                        as 
+                                    x ON 
+                                    friendlist.sender = x.sender 
+                                    and friendlist.lastupdatedate = max 
+                                    where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
+                                    [req.session.accountId,
+                                    req.body.username], 
+                                    (err,rows)=>{
+                                        if(err){
+                                            res.sendStatus(400)
+                                        } else {
+                                            //Inserting accepted to the table
+                                            client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
+                                                            VALUES($1,$2, 'denied', current_timestamp);`,
+                                                            [req.session.accountId,
+                                                            req.body.username],
+                                                            (err2,rows2)=>{
+                                                                if(err2){
+                                                                    res.sendStatus(400)
+                                                                } else {
+                                                                    res.sendStatus(200);
+                                                                }
+                                                            })
+                                        }
+                                    })
+                }
+                release()
+            }
+            
+            )
+        }
+
+    })
 }
