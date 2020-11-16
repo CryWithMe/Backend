@@ -129,3 +129,40 @@ VALUES (
 '0',
 '1',
 );
+
+INSERT INTO Condition(
+    id,
+    condition TEXT,
+    active,
+    lastUpdateDate)
+    VALUES(
+        1,
+        'ADHD',
+        1,
+        0,
+    ),
+    (
+        1,
+        'Anxiety',
+        1,
+        0,
+    ),
+    (
+        2,
+        'ADHD',
+        1,
+        0,
+    ),
+    (
+        4,
+        'OCD',
+        1,
+        0,
+    ),
+    (
+        7,
+        'Depression',
+        1,
+        0,
+    )
+);
