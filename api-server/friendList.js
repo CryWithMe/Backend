@@ -194,4 +194,55 @@ exports.init = function(app){
         }
 
     })
+
+    //Get Friend List
+    app.get("/friendList", (req,res) => {
+        if(req.session.accountId){
+            pool.connect((err,client,release) => {
+                if(!err){
+                    client.query(`SELECT account.username, account.fname, account.lname
+                                    FROM account
+                                    JOIN (
+                                        SELECT *
+                                            FROM friendlist
+                                            JOIN (
+                                                SELECT 
+                                                    sender as id,
+                                                    MAX(lastUpdateDate)
+                                                FROM friendlist
+                                                WHERE recipient = $1
+                                                GROUP BY sender
+                                                UNION
+                                                SELECT 
+                                                    recipient as id,
+                                                    max(lastUpdateDate)
+                                                FROM friendlist
+                                                WHERE sender = $1
+                                                GROUP BY recipient
+                                            ) as X
+                                            ON 
+                                                friendlist.sender = x.id
+                                            OR
+                                                friendlist.recipient = x.id
+                                            WHERE
+                                                state = 'accepted') as z
+                                    ON
+                                        z.id = account.id
+                                    )`,
+                                    [req.session.accountId],
+                                    (err,rows)=>{
+                                        if(err) {
+                                            res.sendStatus(500);
+                                        } else {
+                                            res.send(rows);
+                                        }
+                                    })
+                } else {
+                    res.sendStatus(500);
+                }
+            })
+        } else {
+            res.sendStatus(400);
+        }
+    })
 }
