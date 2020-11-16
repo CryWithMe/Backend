@@ -1,6 +1,8 @@
 const pool = require("./pool").pool;
 
 //Routes Relating to friendlist
+
+//Will duplicate Friend List
 exports.init = function(app){
 
     //Send a friend request Route
@@ -44,4 +46,39 @@ exports.init = function(app){
         }
     });
 
+
+    app.get("/friendRequests", (req,res)=>{
+        if(!req.session.accountId){
+            res.sendStatus(400)
+        }
+        else{
+            pool.connect( (err,client,release)=>{
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query(`SELECT account.username, account.fname, account.lname 
+                                    FROM FRIENDLIST 
+                                        JOIN (
+                                            SELECT sender,max(lastupdatedate) 
+                                                FROM friendlist WHERE recipient = $1
+                                                GROUP BY SENDER) 
+                                            as 
+                                        x ON 
+                                        friendlist.sender = x.sender 
+                                        and friendlist.lastupdatedate = max 
+                                        JOIN account ON friendlist.sender = account.id
+                                        where friendlist.state = 'pending';`,
+                            [req.session.accountId],
+                            (err,rows)=>{
+                                if(!err){
+                                    res.send(rows);
+                                } else {
+                                    res.sendStatus(400);
+                                }
+                            })
+                }
+                release();
+            })
+        }
+    })
 }
