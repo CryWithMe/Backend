@@ -143,4 +143,106 @@ exports.init = function(app){
         }
 
     })
+
+    //Route to Deny a friend request
+    app.post("/denyFriendRequest", (req,res) => {
+        //Seeing if they have an account id and username
+        if(!req.session.accountId && req.body.username){
+            res.sendStatus(400)
+        } else {
+            pool.connect( (err,client,release) =>{
+                if(err){
+                    res.sendStatus(500);
+                } else{
+
+                    //Seeing if there is a pending friend request
+                    client.query(`SELECT COUNT(X) FROM friendlist
+                                    JOIN (
+                                        SELECT sender,max(lastupdatedate) 
+                                            FROM friendlist WHERE recipient = $1
+                                            GROUP BY SENDER) 
+                                        as 
+                                    x ON 
+                                    friendlist.sender = x.sender 
+                                    and friendlist.lastupdatedate = max 
+                                    where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
+                                    [req.session.accountId,
+                                    req.body.username], 
+                                    (err,rows)=>{
+                                        if(err){
+                                            res.sendStatus(400)
+                                        } else {
+                                            //Inserting accepted to the table
+                                            client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
+                                                            VALUES($1,$2, 'denied', current_timestamp);`,
+                                                            [req.session.accountId,
+                                                            req.body.username],
+                                                            (err2,rows2)=>{
+                                                                if(err2){
+                                                                    res.sendStatus(400)
+                                                                } else {
+                                                                    res.sendStatus(200);
+                                                                }
+                                                            })
+                                        }
+                                    })
+                }
+                release()
+            }
+            
+            )
+        }
+
+    })
+
+    //Get Friend List
+    app.get("/friendList", (req,res) => {
+        if(req.session.accountId){
+            pool.connect((err,client,release) => {
+                if(!err){
+                    client.query(`SELECT account.username, account.fname, account.lname
+                                    FROM account
+                                    JOIN (
+                                        SELECT *
+                                            FROM friendlist
+                                            JOIN (
+                                                SELECT 
+                                                    sender as id,
+                                                    MAX(lastUpdateDate)
+                                                FROM friendlist
+                                                WHERE recipient = $1
+                                                GROUP BY sender
+                                                UNION
+                                                SELECT 
+                                                    recipient as id,
+                                                    max(lastUpdateDate)
+                                                FROM friendlist
+                                                WHERE sender = $1
+                                                GROUP BY recipient
+                                            ) as X
+                                            ON 
+                                                friendlist.sender = x.id
+                                            OR
+                                                friendlist.recipient = x.id
+                                            WHERE
+                                                state = 'accepted') as z
+                                    ON
+                                        z.id = account.id
+                                    )`,
+                                    [req.session.accountId],
+                                    (err,rows)=>{
+                                        if(err) {
+                                            res.sendStatus(500);
+                                        } else {
+                                            res.send(rows);
+                                        }
+                                    })
+                } else {
+                    res.sendStatus(500);
+                }
+            })
+        } else {
+            res.sendStatus(400);
+        }
+    })
 }
