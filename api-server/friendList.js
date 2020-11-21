@@ -105,7 +105,7 @@ exports.init = function(app){
                 } else{
 
                     //Seeing if there is a pending friend request
-                    client.query(`SELECT COUNT(X) FROM friendlist
+                    client.query(`SELECT x.sender FROM friendlist
                                     JOIN (
                                         SELECT sender,max(lastupdatedate) 
                                             FROM friendlist WHERE recipient = $1
@@ -125,7 +125,7 @@ exports.init = function(app){
                                             client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
                                                             VALUES($1,$2, 'accepted', current_timestamp);`,
                                                             [req.body.accountId,
-                                                            req.body.username],
+                                                            rows.rows[0].sender],
                                                             (err2,rows2)=>{
                                                                 if(err2){
                                                                     res.sendStatus(400)
@@ -197,7 +197,7 @@ exports.init = function(app){
 
     //Get Friend List
     app.get("/friendList", (req,res) => {
-        if(req.body.accountId && req.body.username){
+        if(req.body.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT account.id
@@ -210,14 +210,14 @@ exports.init = function(app){
                                                     sender as id,
                                                     MAX(lastUpdateDate)
                                                 FROM friendlist
-                                                WHERE recipient = $1 AND sender = $2
+                                                WHERE recipient = $1
                                                 GROUP BY sender
                                                 UNION
                                                 SELECT 
                                                     recipient as id,
                                                     max(lastUpdateDate)
                                                 FROM friendlist
-                                                WHERE sender = $1 AND recipient = $2
+                                                WHERE sender = $1
                                                 GROUP BY recipient
                                             ) as X
                                             ON 
@@ -229,7 +229,7 @@ exports.init = function(app){
                                     ON
                                         z.id = account.id
                                     )`,
-                                    [req.body.accountId, req.body.username],
+                                    [req.body.accountId],
                                     (err,rows)=>{
                                         if(err) {
 					    console.log(err);
