@@ -53,10 +53,10 @@ exports.init = function(app){
     });
 
     //Route to get current pending friend requests
-    app.get("/friendRequests", (req,res)=>{
+    app.get("/friendRequests:/accountId", (req,res)=>{
         
         //If logged in
-        if(!req.body.accountId){
+        if(!req.params.accountId){
             res.sendStatus(400)
         }
         else{
@@ -196,8 +196,9 @@ exports.init = function(app){
     })
 
     //Get Friend List
-    app.get("/friendList", (req,res) => {
-        if(req.body.accountId){
+    app.get("/friendList/:accountId", (req,res) => {
+	console.log(req.body);
+        if(req.params.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT account.username, account.fname, account.lname
@@ -228,10 +229,11 @@ exports.init = function(app){
                                                 state = 'accepted') as z
                                     ON
                                         z.id = account.id
-                                    )`,
-                                    [req.body.accountId],
+                                    ;`,
+                                    [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
+					    console.log(err);
                                             res.sendStatus(500);
                                         } else {
                                             res.send(rows);
