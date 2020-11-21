@@ -37,9 +37,8 @@ exports.init = function(app){
                                     //Checking if passwords matches salt and hash
                                     if(result.rows[0] && result.rows[0].hash == encryption.getHash(result.rows[0].salt, req.body.password) && result.rows[0].active){
                                         
-                                        req.session.accountId = result.rows[0].id;
                                         
-                                        res.sendStatus(200);
+                                        res.status(200).send(result.rows[0].id);
                                     } else {
                                         res.sendStatus(401);
                                     }
@@ -54,18 +53,6 @@ exports.init = function(app){
 
     });
 
-    //Logging out of session
-    //Return 200 is logged in and is now logged out
-    //Return 400 if no account is logged in
-    app.post("/logout", function(req,res){
-        
-        if(req.session.accountId){
-            req.session.accountId = null;
-            res.sendStatus(200);
-        } else {
-            res.sendStatus(401);
-        }
-    })
 
     //Create an account
     //Returns 200 if account does not exist
@@ -115,9 +102,9 @@ exports.init = function(app){
                                         res.sendStatus(400)
                                     } else{
                                         
-                                        req.session.accountId = accountId;
+                                     
                                         
-                                        res.sendStatus(200);
+                                        res.status(200).send(accountId);
                                     }
                                     release()
                                 });
@@ -140,19 +127,18 @@ exports.init = function(app){
     //Returns 400 if account does not exist
     app.post("/deleteAccount", function(req,res){
         //
-        if(req.session.accountId){
+        if(req.body.accountId){
             pool.connect((err,client,release) =>{
                 if(err){
                     console.log(err);
                     res.sendStatus(500);
                 } else {
-                    client.query("SELECT * FROM account WHERE account.id = $1 ORDER BY account.lastUpdateDate LIMIT 1;", [req.session.accountId], (err,result) => {
+                    client.query("SELECT * FROM account WHERE account.id = $1 ORDER BY account.lastUpdateDate LIMIT 1;", [req.body.accountId], (err,result) => {
                         if(result.rows[0].active){
                             client.query("INSERT INTO Account(id,username,fname,lname,email,lastupdatedate,active) VALUES($1,$2,$3,$4,$5, current_timestamp, false);",[result.rows[0].id, result.rows[0].username, result.rows[0].fname, result.rows[0].lname,result.rows[0].email], (err,result)=>{
                                 if(err){
                                     res.sendStatus(500);
                                 } else {
-                                    req.session.accountId = null;
                                     res.sendStatus(200);
                                 };
                             
