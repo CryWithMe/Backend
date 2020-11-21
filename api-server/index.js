@@ -25,12 +25,14 @@ app.use(cors({
 	     "http://localhost:19006",
 	     "http://localhost:19000",
 	     "http://localhost:19008",
+             "exp://10.8..103.22:19000",
 	     "192.168.1.244:19000"],
     exposedHeaders: 'Authorization'
   }));
 
 const logger = log({ label: 'user-service' , console: true, file: true });
 
+app.use(ExpressAPILogMiddleware(logger, { request: true }));
 
 app.get("/", function(req,res){
     res.status(200).send("Cry With Me API is up and running");

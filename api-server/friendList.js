@@ -53,7 +53,7 @@ exports.init = function(app){
     });
 
     //Route to get current pending friend requests
-    app.get("/friendRequests:/accountId", (req,res)=>{
+    app.get("/friendRequests/:accountId", (req,res)=>{
         
         //If logged in
         if(!req.params.accountId){
@@ -79,7 +79,7 @@ exports.init = function(app){
                                         and friendlist.lastupdatedate = max 
                                         JOIN account ON friendlist.sender = account.id
                                         where friendlist.state = 'pending';`,
-                            [req.body.accountId],
+                            [req.params.accountId],
                             (err,rows)=>{
                                 if(!err){
                                     res.send(rows);
