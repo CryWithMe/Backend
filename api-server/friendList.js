@@ -196,12 +196,17 @@ exports.init = function(app){
     })
 
     //Get Friend List
+<<<<<<< HEAD
+    app.get("/friendList", (req,res) => {
+        if(req.body.accountId && req.body.username){
+=======
     app.get("/friendList/:accountId", (req,res) => {
 	console.log(req.body);
         if(req.params.accountId){
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
             pool.connect((err,client,release) => {
                 if(!err){
-                    client.query(`SELECT account.username, account.fname, account.lname
+                    client.query(`SELECT account.id
                                     FROM account
                                     JOIN (
                                         SELECT *
@@ -211,14 +216,14 @@ exports.init = function(app){
                                                     sender as id,
                                                     MAX(lastUpdateDate)
                                                 FROM friendlist
-                                                WHERE recipient = $1
+                                                WHERE recipient = $1 AND sender = $2
                                                 GROUP BY sender
                                                 UNION
                                                 SELECT 
                                                     recipient as id,
                                                     max(lastUpdateDate)
                                                 FROM friendlist
-                                                WHERE sender = $1
+                                                WHERE sender = $1 AND recipient = $2
                                                 GROUP BY recipient
                                             ) as X
                                             ON 
@@ -229,8 +234,13 @@ exports.init = function(app){
                                                 state = 'accepted') as z
                                     ON
                                         z.id = account.id
+<<<<<<< HEAD
+                                    )`,
+                                    [req.body.accountId, req.body.username],
+=======
                                     ;`,
                                     [req.params.accountId],
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
                                     (err,rows)=>{
                                         if(err) {
 					    console.log(err);
@@ -247,4 +257,42 @@ exports.init = function(app){
             res.sendStatus(400);
         }
     })
+<<<<<<< HEAD
+
+    app.post("/deleteFriend", (req,res) => {
+        if(req.body.accountId && req.body.username){
+            pool.connect((err,client,release) => {
+                if(!err){
+                    client.query(`SELECT id FROM account WHERE username = $1 ORDER BY lastUpdateDate DESC LIMIT 1;`,
+                                    [req.body.username],
+                                    (err,rows)=>{
+                                        if(err) {
+                                            res.sendStatus(500);
+                                        } else {
+                                            if(rows.rows[0]) {
+                                                client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate) VALUES($1,$2,"deleted",current_timestamp);`, [req.body.accountId, rows.rows[0].id],
+                                                            (err2,rows2)=>{
+                                                                if(err2){
+                                                                    res.sendStatus(500);
+                                                                }else {
+                                                                    res.sendStatus(200);
+                                                                }
+                                                            })
+                                            }
+                                            else {
+                                                res.sendStatus(400);
+                                            }
+                                        }
+                                    })
+                } else {
+                    res.sendStatus(500);
+                }
+            })
+        } else {
+            res.sendStatus(400);
+        }
+    })
 }
+=======
+}
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
