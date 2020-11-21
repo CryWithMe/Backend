@@ -105,27 +105,19 @@ exports.init = function(app){
                 } else{
 
                     //Seeing if there is a pending friend request
-                    client.query(`SELECT x.sender FROM friendlist
-                                    JOIN (
-                                        SELECT sender,max(lastupdatedate) 
-                                            FROM friendlist WHERE recipient = $1
-                                            GROUP BY SENDER) 
-                                        as 
-                                    x ON 
-                                    friendlist.sender = x.sender 
-                                    and friendlist.lastupdatedate = max 
-                                    where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
-                                    [req.body.accountId,
-                                    req.body.username], 
+                    client.query(`SELECT account.id FROM account where username =$1 ORDER BY lastupdatedate DESC LIMIT 1;`, 
+                                    [req.body.username], 
                                     (err,rows)=>{
+					console.log(rows);
                                         if(err){
+						console.log(err);
                                             res.sendStatus(400)
                                         } else {
                                             //Inserting accepted to the table
                                             client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
                                                             VALUES($1,$2, 'accepted', current_timestamp);`,
                                                             [req.body.accountId,
-                                                            rows.rows[0].sender],
+                                                            rows.rows[0].id],
                                                             (err2,rows2)=>{
                                                                 if(err2){
                                                                     res.sendStatus(400)
@@ -196,11 +188,11 @@ exports.init = function(app){
     })
 
     //Get Friend List
-    app.get("/friendList", (req,res) => {
-        if(req.body.accountId){
+    app.get("/friendList/:accountId", (req,res) => {
+        if(req.params.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
-                    client.query(`SELECT account.id
+                    client.query(`SELECT account.username, account.fname, account.lname
                                     FROM account
                                     JOIN (
                                         SELECT *
@@ -228,8 +220,8 @@ exports.init = function(app){
                                                 state = 'accepted') as z
                                     ON
                                         z.id = account.id
-                                    )`,
-                                    [req.body.accountId],
+                                    ;`,
+                                    [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
 					    console.log(err);
