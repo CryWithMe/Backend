@@ -154,4 +154,23 @@ exports.init = function(app){
             res.sendStatus(401);
         }
     })
+
+    app.get("/accountInfo/:accountId", (req,res)=>{
+        pool.connect((err,client,release) => {
+            if(err){
+                console.log(err);
+            } else {
+                client.query("SELECT account.username, account.fname, account.lname, account.email FROM account WHERE account.id =$1 ORDER BY account.lastUpdateDate LIMIT 1;", [req.params.accountId], (err,result) =>{
+                    if(err){
+                        console.log(err);
+                        res.sendStatus(500);
+                    } else {
+                        res.status(200).send(result);
+                    }
+                })
+            }
+
+            release();
+        })
+    })
 }

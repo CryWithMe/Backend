@@ -6,6 +6,7 @@ services:
         restart: always
         ports:
             - 443:443
+            - 80:80
         volumes:
             - ./api-server:/usr/src/app
         links:
@@ -13,19 +14,10 @@ services:
         environment: 
             - REDIS_URL=redis://cache
             - REDIS_PASSWORD=Banana
-            - PGUSER=cryapi
-            - PGDATABASE=crydb
-            - PGPASSWORD=apple
-    postgres:
-        build: ./postgres
-        restart: always
-        environment: 
-            POSTGRES_PASSWORD: "apple"
-            POSTGRES_DB: "crydb"
-        ports:
-            - 5432:5432
-        volumes:
-            - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - PGUSER=${PGUSER}
+            - PGDATABASE=${PGDATABASE}
+            - PGPASSWORD=${PGPASSWORD}
+            - PGADDRESS=${PGADDRESS}
     redis:
         build: ./redis/
 
