@@ -53,10 +53,10 @@ exports.init = function(app){
     });
 
     //Route to get current pending friend requests
-    app.get("/friendRequests", (req,res)=>{
+    app.get("/friendRequests:/accountId", (req,res)=>{
         
         //If logged in
-        if(!req.body.accountId){
+        if(!req.params.accountId){
             res.sendStatus(400)
         }
         else{
@@ -196,8 +196,14 @@ exports.init = function(app){
     })
 
     //Get Friend List
+<<<<<<< HEAD
     app.get("/friendList", (req,res) => {
         if(req.body.accountId && req.body.username){
+=======
+    app.get("/friendList/:accountId", (req,res) => {
+	console.log(req.body);
+        if(req.params.accountId){
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT account.id
@@ -228,10 +234,16 @@ exports.init = function(app){
                                                 state = 'accepted') as z
                                     ON
                                         z.id = account.id
+<<<<<<< HEAD
                                     )`,
                                     [req.body.accountId, req.body.username],
+=======
+                                    ;`,
+                                    [req.params.accountId],
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
                                     (err,rows)=>{
                                         if(err) {
+					    console.log(err);
                                             res.sendStatus(500);
                                         } else {
                                             res.send(rows);
@@ -245,6 +257,7 @@ exports.init = function(app){
             res.sendStatus(400);
         }
     })
+<<<<<<< HEAD
 
     app.post("/deleteFriend", (req,res) => {
         if(req.body.accountId && req.body.username){
@@ -280,3 +293,6 @@ exports.init = function(app){
         }
     })
 }
+=======
+}
+>>>>>>> ca240aaaf871957fded78850f932faeec489b0d2
