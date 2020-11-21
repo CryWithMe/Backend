@@ -8,7 +8,7 @@ exports.init = function(app){
     //Send a friend request Route
     app.post("/friendRequest", (req,res)=>{
         //Checking if account is logged in to the session
-        if(!req.session.accountId){
+        if(!req.body.accountId){
             res.sendStatus(400);
         } 
         else{
@@ -29,9 +29,9 @@ exports.init = function(app){
                                         }
 
                                         //Checking if account exists and is active
-                                        else if(result.rows[0] && result.rows[0].id != req.session.accountId && result.rows[0].active){
+                                        else if(result.rows[0] && result.rows[0].id != req.body.accountId && result.rows[0].active){
                                             //Inserting into friends list
-                                            client.query("INSERT INTO friendlist(sender,recipient,state, lastupdatedate) VALUES($1, $2, 'pending', current_timestamp);", [req.session.accountId, result.rows[0].id],
+                                            client.query("INSERT INTO friendlist(sender,recipient,state, lastupdatedate) VALUES($1, $2, 'pending', current_timestamp);", [req.body.accountId, result.rows[0].id],
                                             (err, result)=>{
                                                 //If error, server is sad
                                                 if(err){
@@ -56,7 +56,7 @@ exports.init = function(app){
     app.get("/friendRequests", (req,res)=>{
         
         //If logged in
-        if(!req.session.accountId){
+        if(!req.body.accountId){
             res.sendStatus(400)
         }
         else{
@@ -79,7 +79,7 @@ exports.init = function(app){
                                         and friendlist.lastupdatedate = max 
                                         JOIN account ON friendlist.sender = account.id
                                         where friendlist.state = 'pending';`,
-                            [req.session.accountId],
+                            [req.body.accountId],
                             (err,rows)=>{
                                 if(!err){
                                     res.send(rows);
@@ -96,7 +96,7 @@ exports.init = function(app){
     //Route to accept a friend request
     app.post("/acceptFriendRequest", (req,res) => {
         //Seeing if they have an account id and username
-        if(!req.session.accountId && req.body.username){
+        if(!req.body.accountId && req.body.username){
             res.sendStatus(400)
         } else {
             pool.connect( (err,client,release) =>{
@@ -115,7 +115,7 @@ exports.init = function(app){
                                     friendlist.sender = x.sender 
                                     and friendlist.lastupdatedate = max 
                                     where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
-                                    [req.session.accountId,
+                                    [req.body.accountId,
                                     req.body.username], 
                                     (err,rows)=>{
                                         if(err){
@@ -124,7 +124,7 @@ exports.init = function(app){
                                             //Inserting accepted to the table
                                             client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
                                                             VALUES($1,$2, 'accepted', current_timestamp);`,
-                                                            [req.session.accountId,
+                                                            [req.body.accountId,
                                                             req.body.username],
                                                             (err2,rows2)=>{
                                                                 if(err2){
@@ -147,7 +147,7 @@ exports.init = function(app){
     //Route to Deny a friend request
     app.post("/denyFriendRequest", (req,res) => {
         //Seeing if they have an account id and username
-        if(!req.session.accountId && req.body.username){
+        if(!req.body.accountId && req.body.username){
             res.sendStatus(400)
         } else {
             pool.connect( (err,client,release) =>{
@@ -166,7 +166,7 @@ exports.init = function(app){
                                     friendlist.sender = x.sender 
                                     and friendlist.lastupdatedate = max 
                                     where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
-                                    [req.session.accountId,
+                                    [req.body.accountId,
                                     req.body.username], 
                                     (err,rows)=>{
                                         if(err){
@@ -175,7 +175,7 @@ exports.init = function(app){
                                             //Inserting accepted to the table
                                             client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
                                                             VALUES($1,$2, 'denied', current_timestamp);`,
-                                                            [req.session.accountId,
+                                                            [req.body.accountId,
                                                             req.body.username],
                                                             (err2,rows2)=>{
                                                                 if(err2){
@@ -197,7 +197,7 @@ exports.init = function(app){
 
     //Get Friend List
     app.get("/friendList", (req,res) => {
-        if(req.session.accountId){
+        if(req.body.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT account.username, account.fname, account.lname
@@ -229,7 +229,7 @@ exports.init = function(app){
                                     ON
                                         z.id = account.id
                                     )`,
-                                    [req.session.accountId],
+                                    [req.body.accountId],
                                     (err,rows)=>{
                                         if(err) {
                                             res.sendStatus(500);
