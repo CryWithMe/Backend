@@ -192,7 +192,7 @@ exports.init = function(app){
         if(req.params.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
-                    client.query(`SELECT account.username, account.fname, account.lname
+                    client.query(`SELECT * FROM (SELECT account.username, account.fname, account.lname,account.active
                                     FROM account
                                     JOIN (
                                         SELECT *
@@ -220,7 +220,7 @@ exports.init = function(app){
                                                 state = 'accepted') as z
                                     ON
                                         z.id = account.id
-                                    ;`,
+                                    ) as y WHERE y.active = true;`,
                                     [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
