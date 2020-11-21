@@ -23,7 +23,12 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 app.use(cors({
-    credentials:true
+    origin: ["http://localhost:19007", 
+	     "http://localhost:19006",
+	     "http://localhost:19000",
+	     "http://localhost:19008",
+	     "192.168.1.244:19000"],
+    exposedHeaders: 'Authorization'
   }));
 
 const logger = log({ label: 'user-service' , console: true, file: true });
@@ -35,7 +40,7 @@ app.get("/", function(req,res){
 });
 
 
-app.listen(443, () => {
+app.listen(80, () => {
     logger.info(`Listening to requests on 443`);
 });
 
