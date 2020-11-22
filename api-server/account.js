@@ -182,7 +182,7 @@ exports.init = function(app){
                 } else {
                     client.query(`
                         SELECT 
-                            account.fname, account,lname
+                            account.fname, account.lname
                         FROM (
                             SELECT 
                                 lastUpdateDate
