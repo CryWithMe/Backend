@@ -53,6 +53,29 @@ exports.init = function(app){
 
     });
 
+    app.put("/changePassword", (req,res) => {
+        if(req.body.accountId && req.body.newPassword){
+            salt = encryption.getSalt();
+            hash = encryption.getHash(salt, req.body.newPassword);
+
+            pool.connect((err,client,release) => {
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [accountId, salt,hash], (err,result)=>{
+                        if(err){
+                            res.sendStatus(500);
+                        } else {
+                            res.sendStatus(200);
+                        }
+                    })
+                }
+                release()
+            })
+        } else {
+            res.sendStatus(400);
+        }
+    })
 
     //Create an account
     //Returns 200 if account does not exist
@@ -76,7 +99,7 @@ exports.init = function(app){
                     
                     if(err){
                         console.log(err);
-                        res.send(400)
+                        res.status(400).send("User Exists");
                     }
                     //If username is not taken
                     if(result.rowCount == 0){

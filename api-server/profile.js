@@ -1,8 +1,8 @@
 const pool = require("./pool").pool;
 
-exports.init = (app) => {
+exports.init = function(app){
 
-    app.post("/condition", (req,res) => {
+    app.post("/condition", function(req,res){
         if(req.body.accountId && req.body.condition){
             pool.connect((err,client,release) => {
                 if(err){
@@ -31,6 +31,7 @@ exports.init = (app) => {
                                         }
                                     })
                 }
+                release();
             })
         }
     })
