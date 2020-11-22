@@ -146,29 +146,20 @@ exports.init = function(app){
                 if(err){
                     res.sendStatus(500);
                 } else{
-
                     //Seeing if there is a pending friend request
-                    client.query(`SELECT COUNT(X) FROM friendlist
-                                    JOIN (
-                                        SELECT sender,max(lastupdatedate) 
-                                            FROM friendlist WHERE recipient = $1
-                                            GROUP BY SENDER) 
-                                        as 
-                                    x ON 
-                                    friendlist.sender = x.sender 
-                                    and friendlist.lastupdatedate = max 
-                                    where friendlist.sender = $2 AND friendlist.state = 'pending';`, 
-                                    [req.body.accountId,
-                                    req.body.username], 
+                    client.query(`SELECT account.id FROM account where username =$1 ORDER BY lastupdatedate DESC LIMIT 1;`, 
+                                    [req.body.username], 
                                     (err,rows)=>{
+					console.log(rows);
                                         if(err){
+						console.log(err);
                                             res.sendStatus(400)
                                         } else {
                                             //Inserting accepted to the table
                                             client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate)
                                                             VALUES($1,$2, 'denied', current_timestamp);`,
                                                             [req.body.accountId,
-                                                            req.body.username],
+                                                            rows.rows[0].id],
                                                             (err2,rows2)=>{
                                                                 if(err2){
                                                                     res.sendStatus(400)
