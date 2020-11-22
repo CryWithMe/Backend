@@ -27,35 +27,46 @@ exports.init = (app) => {
                 if(err){
                     res.sendStatus(500);
                 } else {
-                    client.query(`SELECT pushtoken
-                    FROM push
-                    JOIN (
-                        SELECT *
-                            FROM friendlist
-                            JOIN (
-                                SELECT 
-                                    sender as id,
-                                    MAX(lastUpdateDate)
-                                FROM friendlist
-                                WHERE recipient = $1
-                                GROUP BY sender
-                                UNION
-                                SELECT 
-                                    recipient as id,
-                                    max(lastUpdateDate)
-                                FROM friendlist
-                                WHERE sender = $1
-                                GROUP BY recipient
-                            ) as X
-                            ON 
-                                friendlist.sender = x.id
-                            OR
-                                friendlist.recipient = x.id
-                            WHERE
-                                state = 'accepted') as z
+                    client.query(`SELECT 
+                        push.pushtoken
+                    FROM (SELECT 
+                        recipient as id, 
+                        max(lastupdatedate)
+                    FROM 
+                        friendlist
+                    WHERE 
+                        sender = $1 
+                    GROUP BY 
+                        recipient 
+                    UNION 
+                    SELECT 
+                        sender as id, 
+                        max(lastupdatedate)
+                    FROM 
+                        friendlist 
+                    WHERE 
+                        recipient = $1
+                    GROUP BY 
+                        sender) as y
+                    JOIN
+                        friendlist
                     ON
-                        z.id = push.id
-                    )`, [req.body.accountId], (err,rows)=> {
+                        y.max = friendlist.lastupdatedate
+                    JOIN 
+                        account
+                    ON 
+                        friendlist.sender = account.id
+                    OR
+                        friendlist.recipient = account.id
+                    WHERE 
+                        account.id != $1
+                    AND 
+                        friendlist.state = 'accepted'
+                    JOIN
+                        push
+                    ON
+                        account.id = $1;`,
+                    [req.body.accountId], (err,rows)=> {
                         res.status(200).send(rows);
                         client.query("INSERT INTO event(sender,eventid,type,date) VALUES($1,$2,$3, current_timesamp);",
                                     [req.body.accountId, v4(), req.body.type],
