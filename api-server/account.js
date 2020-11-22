@@ -225,7 +225,7 @@ exports.init = function(app){
             if(err){
                 console.log(err);
             } else {
-                client.query("SELECT account.username, account.fname, account.lname, account.email FROM account WHERE account.id =$1 ORDER BY account.lastUpdateDate LIMIT 1;", [req.params.accountId], (err,result) =>{
+                client.query("SELECT account.username, account.fname, account.lname, account.email FROM account WHERE account.id =$1 ORDER BY account.lastUpdateDate DESC LIMIT 1;", [req.params.accountId], (err,result) =>{
                     if(err){
                         console.log(err);
                         res.sendStatus(500);
