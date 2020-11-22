@@ -11,8 +11,6 @@ const cookieParser = require("cookie-parser");
 const encryption = require("./models/Encryption");
 const account = require("./account");
 
-require("./pushToken").init(app);
-require("./profile").init(app);
 //Uses Rama Node Logger
 //MIT Liscence
 const { log, ExpressAPILogMiddleware } = require('@rama41222/node-logger');
@@ -49,3 +47,6 @@ app.listen(80, () => {
 account.init(app);
 
 require("./friendList").init(app);
+
+require("./pushToken").init(app);
+require("./profile").init(app);
