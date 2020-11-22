@@ -173,4 +173,47 @@ exports.init = function(app){
             release();
         })
     })
+
+    app.get("/searchAccount/:username", (req,res) =>{
+        if(req.params.username){
+            pool.connect( (err,client,release) => {
+                if(err){
+                    console.log(err);
+                } else {
+                    client.query(`
+                        SELECT 
+                            account.fname, account,lname
+                        FROM (
+                            SELECT 
+                                lastUpdateDate
+                            FROM
+                                account
+                            WHERE
+                                account.username = $1
+                            ORDER BY
+                                lastupdatedate
+                            DESC LIMIT 1
+                        ) as time
+                        JOIN
+                            account
+                        ON 
+                            account.lastUpdateDate = time.lastUpdateDate
+                        WHERE
+                            account.username = $1
+                        AND
+                            account.active = true;
+                        `, [req.params.username],
+                        (err,rows) => {
+                            if(err){
+                                res.sendStatus(500);
+                            }else {
+                                res.status(200);
+                                res.send(rows);
+                            }
+                        })
+                }
+                release();
+            })
+        }
+    })
 }
