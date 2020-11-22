@@ -85,7 +85,7 @@ exports.init = (app) => {
         }
     })
 
-    app.post("eventResponse", (req,res) => {
+    app.post("/eventResponse", (req,res) => {
         if(req.body.accountId, req.body.username){
             pool.connect((err,client,release)=>{
                 if(err){
@@ -143,6 +143,84 @@ exports.init = (app) => {
             })
         } else {
             res.sendStatus(400)
+        }
+    })
+
+    app.get("/eventList/:id", (req,res) => {
+        if(req.params.id){
+            pool.connect((err,client,release)=>{
+                if(err){
+                    res.sendStatus(500)
+                } else{
+                    client.query(`
+                SELECT
+                    account.username,
+                    event.type, 
+                    event.date 
+                FROM
+                    (SELECT 
+                        account.id
+                        FROM (SELECT 
+                            recipient as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist
+                        WHERE 
+                            sender =$1 
+                        GROUP BY 
+                            recipient 
+                        UNION 
+                        SELECT 
+                            sender as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist 
+                        WHERE 
+                            recipient = $1 
+                        GROUP BY 
+                            sender) as y
+                        JOIN
+                            friendlist
+                        ON
+                            y.max = friendlist.lastupdatedate
+                        JOIN 
+                            account
+                        ON 
+                            friendlist.sender = account.id
+                        OR
+                            friendlist.recipient = account.id
+                        WHERE 
+                            account.id != $1
+                        AND 
+                            friendlist.state = 'accepted'
+                        AND account.active = true) as friends
+                JOIN
+                    event
+                ON 
+                    event.sender = friends.id
+                JOIN
+                    account
+                ON
+                    friends.id = account.id
+                WHERE
+                    event.date
+                BETWEEN
+                    NOW() - INTERVAL '48 HOURS' and NOW()
+                ORDER BY
+                    event.date
+                DESC;`,
+                [req.params.id],
+                (err,rows) =>{
+                    if(err){
+                        console.log(err);
+                        res.sendStatus(500);
+                    } else {
+                        res.status(200).send(rows.rows);
+                    }
+                })
+                }
+                release()
+            })
         }
     })
 }
