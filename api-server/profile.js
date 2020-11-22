@@ -77,7 +77,7 @@ exports.init = function(app){
 
 
     app.post("/comfort", (req,res) => {
-        if(req.body.accountId && req.body.comofort){
+        if(req.body.accountId && req.body.comfort){
             pool.connect((err,client,release) => {
                 if(err){
                     console.log(err);
