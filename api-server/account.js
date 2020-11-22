@@ -178,6 +178,48 @@ exports.init = function(app){
         }
     })
 
+    app.put("/updateAccount", (req,res)=> {
+        if(req.body.accountId && req.body.username && req.body.fname && req.body.lname && req.body.email){
+            pool.connect((err,client,release)=>{
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query(`INSERT INTO
+                                    account(
+                                        id,
+                                        username,
+                                        fname,
+                                        lname,
+                                        email,
+                                        lastupdatedate,
+                                        active
+                                    )
+                                VALUES(
+                                    $1,
+                                    $2,
+                                    $3,
+                                    $4,
+                                    $5,
+                                    current_timestamp,
+                                    true
+                                );`,
+                                [req.body.accountId,req.body.username,req.body.fname,req.body.lname,req.body.email],
+                                (err,rows)=>{
+                                    if(err){
+                                        console.log(err);
+                                        res.sendStatus(500)
+                                    } else {
+                                        res.sendStatus(200)
+                                    }
+                                })
+                }
+                release()
+            })
+        } else {
+            res.sendStatus(400);
+        }
+    })
+
     app.get("/accountInfo/:accountId", (req,res)=>{
         pool.connect((err,client,release) => {
             if(err){
