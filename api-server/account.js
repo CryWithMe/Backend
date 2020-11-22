@@ -208,7 +208,7 @@ exports.init = function(app){
                                 res.sendStatus(500);
                             }else {
                                 res.status(200);
-                                res.send(rows);
+                                res.send(rows.rows);
                             }
                         })
                 }
