@@ -204,6 +204,7 @@ exports.init = function(app){
                             account.active = true;
                         `, [req.params.username],
                         (err,rows) => {
+			
                             if(err){
                                 res.sendStatus(500);
                             }else {
