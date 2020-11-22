@@ -3,7 +3,8 @@ const pool = require("./pool").pool;
 exports.init = (app) => {
 
     app.post("/condition", (req,res) => {
-        if(req.body.accountId && req.body.condition){
+	
+        if(req.body && Treq.body.accountId && req.body.condition){
             pool.connect((err,client,release) => {
                 if(err){
                     console.log(err);
@@ -32,7 +33,9 @@ exports.init = (app) => {
                                     })
                 }
             })
-        }
+        } else {
+	    res.sendStatus(400);
+	}
     })
 
     app.get("/condition/:username", (req,res) => {
