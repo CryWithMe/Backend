@@ -84,4 +84,65 @@ exports.init = (app) => {
             })
         }
     })
+
+    app.post("eventResponse", (req,res) => {
+        if(req.body.accountId, req.body.username){
+            pool.connect((err,client,release)=>{
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query(`SELECT 
+                                    event.eventid as eventid, push.token as token,account.id as accountid
+                                FROM 
+                                    event 
+                                JOIN 
+                                    account 
+                                ON 
+                                    event.sender = account.id 
+                                JOIN 
+                                    push 
+                                ON 
+                                    id = account.id 
+                                WHERE 
+                                    account.username = $1 
+                                ORDER BY 
+                                    event.date 
+                                DESC LIMIT 1;`,
+                                [req.body.username], 
+                                (err,rows) => {
+                                    if(!err && rows.rowCount>0){
+                                        client.query(`
+                                            INSERT INTO
+                                                response(
+                                                    responder,
+                                                    eventid,
+                                                    responseid,
+                                                    type,
+                                                    date
+                                                ) 
+                                            VALUES(
+                                                $1,
+                                                $2,
+                                                $3,
+                                                $4,
+                                                current_timestamp
+                                            );
+                                        `, [rows.rows[0].accountid, rows.rows[0].eventid, v4(), req.body.type ?  req.body.type: 'none'],
+                                            (err2,row2) => {
+                                                if(err2){
+                                                    console.log(err2);
+                                                    res.sendStatus(500);
+                                                } else {
+                                                    res.status(200).send(rows[0].token);
+                                                }
+                                            })
+                                    }
+                                })
+                }
+                release();
+            })
+        } else {
+            res.sendStatus(400)
+        }
+    })
 }
