@@ -259,8 +259,11 @@ exports.init = function(app){
                                             res.sendStatus(500);
                                         } else {
                                             if(rows.rows[0]) {
-                                                client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate) VALUES($1,$2,"deleted",current_timestamp);`, [req.body.accountId, rows.rows[0].id],
+                                                client.query(`INSERT INTO friendlist(sender,recipient,state,lastupdatedate) VALUES($1,$2,'deleted',current_timestamp);`,
+								 [req.body.accountId, rows.rows[0].id],
                                                             (err2,rows2)=>{
+								
+								
                                                                 if(err2){
                                                                     res.sendStatus(500);
                                                                 }else {
