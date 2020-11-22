@@ -192,39 +192,48 @@ exports.init = function(app){
         if(req.params.accountId){
             pool.connect((err,client,release) => {
                 if(!err){
-                    client.query(`SELECT * FROM (SELECT account.username, account.fname, account.lname,account.active
-                                    FROM account
-                                    JOIN (
-                                        SELECT *
-                                            FROM friendlist
-                                            JOIN (
-                                                SELECT 
-                                                    sender as id,
-                                                    MAX(lastUpdateDate)
-                                                FROM friendlist
-                                                WHERE recipient = $1
-                                                GROUP BY sender
-                                                UNION
-                                                SELECT 
-                                                    recipient as id,
-                                                    max(lastUpdateDate)
-                                                FROM friendlist
-                                                WHERE sender = $1
-                                                GROUP BY recipient
-                                            ) as X
-                                            ON 
-                                                friendlist.sender = x.id
-                                            OR
-                                                friendlist.recipient = x.id
-                                            WHERE
-                                                state = 'accepted') as z
+                    client.query(`SELECT 
+                                        account.fname, 
+                                        account.lname, 
+                                        account.username
+                                    FROM (SELECT 
+                                        recipient as id, 
+                                        max(lastupdatedate)
+                                    FROM 
+                                        friendlist
+                                    WHERE 
+                                        sender =$1 
+                                    GROUP BY 
+                                        recipient 
+                                    UNION 
+                                    SELECT 
+                                        sender as id, 
+                                        max(lastupdatedate)
+                                    FROM 
+                                        friendlist 
+                                    WHERE 
+                                        recipient = $1 
+                                    GROUP BY 
+                                        sender) as y
+                                    JOIN
+                                        friendlist
                                     ON
-                                        z.id = account.id
-                                    ) as y WHERE y.active = true;`,
+                                        y.max = friendlist.lastupdatedate
+                                    JOIN 
+                                        account
+                                    ON 
+                                        friendlist.sender = account.id
+                                    OR
+                                        friendlist.recipient = account.id
+                                    WHERE 
+                                        account.id != $1
+                                    AND 
+                                        friendlist.state = 'accepted'
+                                    AND account.active = true;`,
                                     [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
-					    console.log(err);
+					                        console.log(err);
                                             res.sendStatus(500);
                                         } else {
                                             res.send(rows);

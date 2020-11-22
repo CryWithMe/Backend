@@ -126,7 +126,7 @@ exports.init = function(app){
     //Returns 200 if account exists and is deletable
     //Returns 400 if account does not exist
     app.post("/deleteAccount", function(req,res){
-        //
+        console.log(req.body);
         if(req.body.accountId){
             pool.connect((err,client,release) =>{
                 if(err){
