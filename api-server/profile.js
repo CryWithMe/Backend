@@ -73,6 +73,76 @@ exports.init = (app) => {
     })
 
 
+    app.post("/comfort", (req,res) => {
+        if(req.body.accountId && req.body.comofort){
+            pool.connect((err,client,release) => {
+                if(err){
+                    console.log(err);
+                    res.sendStatus(500);
+                } else {
+                    client.query(`INSERT INTO 
+                                    comforts(
+                                        id,
+                                        comfort,
+                                        active,
+                                        lastupdatedate)
+                                    VALUES(
+                                        $1,
+                                        $2,
+                                        'true',
+                                        current_timestamp
+                                    );`,
+                                    [req.body.accountId,
+                                    req.body.comfort],
+                                    (err,rows)=>{
+                                        if(err){
+                                            res.sendStatus(500);
+                                        } else {
+                                            res.sendStatus(200)
+                                        }
+                                    })
+                }
+            })
+        }
+    })
+
+    app.get("/comfort/:username", (req,res) => {
+        if(req.params.username){
+            pool.connect((err,client,release)=> {
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query(
+                        `SELECT 
+                            comfort.condition
+                        FROM
+                            comfort
+                        JOIN
+                            account
+                        ON
+                            account.id=comfort.id
+                        WHERE
+                            account.username = $1
+                        ORDER BY
+                            comfort.lastupdatedate
+                        DESC LIMIT 1;`,
+                        [req.body.username],
+                        (err,rows)=>{
+                            if(err){
+                                res.sendStatus(500)
+                            }else {
+                                res.status(200).send(rows);
+                            }
+                        })
+                }
+            })
+        } else {
+            res.sendStatus(400);
+        }
+
+
+    })
+
 
 
 
