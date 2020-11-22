@@ -57,3 +57,17 @@ CREATE TABLE Push(
     active BOOLEAN,
     lastUpdateDate date
 );
+
+CREATE TABLE Triggers(
+    id VARCHAR(36),
+    condition TEXT,
+    active BOOLEAN,
+    lastUpdateDate TIMESTAMP
+);
+
+CREATE TABLE Comforts(
+    id VARCHAR(36),
+    condition TEXT,
+    active BOOLEAN,
+    lastUpdateDate TIMESTAMP
+) 
