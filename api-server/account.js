@@ -207,8 +207,11 @@ exports.init = function(app){
                             if(err){
                                 res.sendStatus(500);
                             }else {
-                                res.status(200);
-                                res.send(rows.rows);
+                                if(rows.rowCount==0){
+                                    res.sendStatus(404)
+                                }else {
+                                    res.send(rows.rows);
+                                }
                             }
                         })
                 }
