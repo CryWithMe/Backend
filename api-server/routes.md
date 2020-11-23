@@ -212,6 +212,8 @@ post /eventResponse
         accountId
 
         username
+
+        type
     
     return
 
