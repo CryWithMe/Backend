@@ -90,17 +90,17 @@ exports.init = (app) => {
                     res.sendStatus(500);
                 } else {
                     client.query(`SELECT 
-                                    event.eventid as eventid, push.token as token,account.id as accountid
+                                    event.eventid as eventid, push.pushtoken as token,account.id as accountid
                                 FROM 
                                     event 
                                 JOIN 
                                     account 
                                 ON 
                                     event.sender = account.id 
-                                JOIN 
+                                LEFT JOIN 
                                     push 
                                 ON 
-                                    id = account.id 
+                                    push.id = account.id 
                                 WHERE 
                                     account.username = $1 
                                 ORDER BY 
@@ -108,6 +108,7 @@ exports.init = (app) => {
                                 DESC LIMIT 1;`,
                                 [req.body.username], 
                                 (err,rows) => {
+				    console.log(rows);
                                     if(!err && rows.rowCount>0){
                                         client.query(`
                                             INSERT INTO
@@ -131,10 +132,12 @@ exports.init = (app) => {
                                                     console.log(err2);
                                                     res.sendStatus(500);
                                                 } else {
-                                                    res.status(200).send(rows[0].token);
+                                                    res.status(200).send(rows.rows[0].token);
                                                 }
                                             })
-                                    }
+                                    } else {
+					res.sendStatus(400);	
+				    }
                                 })
                 }
                 release();
