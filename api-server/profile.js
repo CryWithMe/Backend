@@ -86,7 +86,7 @@ exports.init = function(app){
                     client.query(`INSERT INTO 
                                     comforts(
                                         id,
-                                        comfort,
+                                        condition,
                                         active,
                                         lastupdatedate)
                                     VALUES(
@@ -99,6 +99,7 @@ exports.init = function(app){
                                     req.body.comfort],
                                     (err,rows)=>{
                                         if(err){
+					    console.log(err);
                                             res.sendStatus(500);
                                         } else {
                                             res.sendStatus(200)
@@ -107,6 +108,9 @@ exports.init = function(app){
                 }
             })
         }
+	else{
+		res.sendStatus(400);
+	}
     })
 
     app.get("/comfort/:username", (req,res) => {
