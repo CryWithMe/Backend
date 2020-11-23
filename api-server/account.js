@@ -62,7 +62,7 @@ exports.init = function(app){
                 if(err){
                     res.sendStatus(500);
                 } else {
-                    client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [accountId, salt,hash], (err,result)=>{
+                    client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [req.body.accountId, salt,hash], (err,result)=>{
                         if(err){
                             res.sendStatus(500);
                         } else {
