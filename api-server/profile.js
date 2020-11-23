@@ -194,19 +194,20 @@ exports.init = function(app){
                         `SELECT 
                             triggers.condition
                         FROM
-                            trigger
+                            triggers
                         JOIN
                             account
                         ON
-                            account.id=trigger.id
+                            account.id=triggers.id
                         WHERE
                             account.username = $1
                         ORDER BY
-                            trigger.lastupdatedate
+                            triggers.lastupdatedate
                         DESC LIMIT 1;`,
-                        [req.body.username],
+                        [req.params.username],
                         (err,rows)=>{
                             if(err){
+				console.log(err);
                                 res.sendStatus(500)
                             }else {
                                 res.status(200).send(rows);
