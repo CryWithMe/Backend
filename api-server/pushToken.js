@@ -84,7 +84,7 @@ exports.init = (app) => {
     })
 
     app.post("/eventResponse", (req,res) => {
-        if(req.body.accountId, req.body.username){
+        if(req.body.accountId && req.body.username && req.body.type){
             pool.connect((err,client,release)=>{
                 if(err){
                     res.sendStatus(500);
