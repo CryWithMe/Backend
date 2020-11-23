@@ -86,7 +86,7 @@ exports.init = function(app){
                     client.query(`INSERT INTO 
                                     comforts(
                                         id,
-                                        comfort,
+                                        condition,
                                         active,
                                         lastupdatedate)
                                     VALUES(
@@ -128,6 +128,76 @@ exports.init = function(app){
                             account.username = $1
                         ORDER BY
                             comfort.lastupdatedate
+                        DESC LIMIT 1;`,
+                        [req.body.username],
+                        (err,rows)=>{
+                            if(err){
+                                res.sendStatus(500)
+                            }else {
+                                res.status(200).send(rows);
+                            }
+                        })
+                }
+            })
+        } else {
+            res.sendStatus(400);
+        }
+
+
+    })
+
+    app.post("/trigger", (req,res) => {
+        if(req.body.accountId && req.body.trigger){
+            pool.connect((err,client,release) => {
+                if(err){
+                    console.log(err);
+                    res.sendStatus(500);
+                } else {
+                    client.query(`INSERT INTO 
+                                    triggers(
+                                        id,
+                                        condition,
+                                        active,
+                                        lastupdatedate)
+                                    VALUES(
+                                        $1,
+                                        $2,
+                                        'true',
+                                        current_timestamp
+                                    );`,
+                                    [req.body.accountId,
+                                    req.body.trigger],
+                                    (err,rows)=>{
+                                        if(err){
+                                            res.sendStatus(500);
+                                        } else {
+                                            res.sendStatus(200)
+                                        }
+                                    })
+                }
+            })
+        }
+    })
+
+    app.get("/trigger/:username", (req,res) => {
+        if(req.params.username){
+            pool.connect((err,client,release)=> {
+                if(err){
+                    res.sendStatus(500);
+                } else {
+                    client.query(
+                        `SELECT 
+                            triggers.condition
+                        FROM
+                            trigger
+                        JOIN
+                            account
+                        ON
+                            account.id=trigger.id
+                        WHERE
+                            account.username = $1
+                        ORDER BY
+                            trigger.lastupdatedate
                         DESC LIMIT 1;`,
                         [req.body.username],
                         (err,rows)=>{
