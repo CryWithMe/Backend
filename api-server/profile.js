@@ -58,7 +58,7 @@ exports.init = function(app){
                         ORDER BY
                             condition.lastupdatedate
                         DESC LIMIT 1;`,
-                        [req.body.username],
+                        [req.params.username],
                         (err,rows)=>{
                             if(err){
                                 res.sendStatus(500)
@@ -117,21 +117,22 @@ exports.init = function(app){
                 } else {
                     client.query(
                         `SELECT 
-                            comfort.condition
+                            comforts.condition
                         FROM
-                            comfort
+                            comforts
                         JOIN
                             account
                         ON
-                            account.id=comfort.id
+                            account.id=comforts.id
                         WHERE
                             account.username = $1
                         ORDER BY
-                            comfort.lastupdatedate
+                            comforts.lastupdatedate
                         DESC LIMIT 1;`,
-                        [req.body.username],
+                        [req.params.username],
                         (err,rows)=>{
                             if(err){
+				console.log(err);
                                 res.sendStatus(500)
                             }else {
                                 res.status(200).send(rows);
