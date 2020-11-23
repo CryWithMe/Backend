@@ -96,13 +96,17 @@ exports.init = function(app){
                     y.max = friendlist.lastupdatedate
                 JOIN 
                     account
-                ON
+                ON 
+                    friendlist.sender = account.id
+                OR
                     friendlist.recipient = account.id
                 WHERE 
                     account.id != $1
                 AND 
                     friendlist.state = 'pending'
-                AND account.active = true;`,
+                AND 
+                    friendlist.recipient = $1
+                AND account.active = true`,
                             [req.params.accountId],
                             (err,rows)=>{
                                 if(!err){
