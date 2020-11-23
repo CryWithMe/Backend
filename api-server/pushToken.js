@@ -22,6 +22,7 @@ exports.init = (app) => {
     })
 
     app.post("/event", (req,res) => {
+	console.log(req.body);
         if(req.body.accountId && req.body.type) {
             pool.connect((err,client,release) => {
                 if(err){
@@ -68,21 +69,18 @@ exports.init = (app) => {
                         account.id = $1;`,
                     [req.body.accountId], (err,rows)=> {
                         res.status(200).send(rows);
-                        client.query("INSERT INTO event(sender,eventid,type,date) VALUES($1,$2,$3, current_timesamp);",
+                        client.query("INSERT INTO event(sender,eventid,type,date) VALUES($1,$2,$3, current_timestamp);",
                                     [req.body.accountId, v4(), req.body.type],
                                     (err2,rows2)=>{
-                                        if(err2){
-                                            console.log(err2);
-                                            res.sendStatus(500)
-                                        }else {
-                                            res.sendStatus(200);
-                                        }
+                                        
                                     })
                         release();
                     })
                 }
             })
-        }
+        } else {
+	    res.sendStatus(400);
+	}
     })
 
     app.post("/eventResponse", (req,res) => {
