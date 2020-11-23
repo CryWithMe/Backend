@@ -67,6 +67,8 @@ exports.init = function(app){
                             }
                         })
                 }
+            
+            release()
             })
         } else {
             res.sendStatus(400);
@@ -106,6 +108,7 @@ exports.init = function(app){
                                         }
                                     })
                 }
+            release()
             })
         }
 	else{
@@ -143,6 +146,7 @@ exports.init = function(app){
                             }
                         })
                 }
+            release()
             })
         } else {
             res.sendStatus(400);
@@ -180,6 +184,7 @@ exports.init = function(app){
                                         }
                                     })
                 }
+            release()
             })
         }
     })
@@ -214,6 +219,7 @@ exports.init = function(app){
                             }
                         })
                 }
+            release()
             })
         } else {
             res.sendStatus(400);

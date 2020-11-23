@@ -261,6 +261,8 @@ exports.init = function(app){
                 } else {
                     res.sendStatus(500);
                 }
+            
+            release();
             })
         } else {
             res.sendStatus(400);
@@ -298,6 +300,7 @@ exports.init = function(app){
                 } else {
                     res.sendStatus(500);
                 }
+            release()
             })
         } else {
             res.sendStatus(400);
