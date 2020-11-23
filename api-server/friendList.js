@@ -67,18 +67,42 @@ exports.init = function(app){
                 } else {
 
                     //See if the most recent row of the sender and recipient is pending, really complicated but makes sense
-                    client.query(`SELECT account.username, account.fname, account.lname 
-                                    FROM FRIENDLIST 
-                                        JOIN (
-                                            SELECT sender,max(lastupdatedate) 
-                                                FROM friendlist WHERE recipient = $1
-                                                GROUP BY SENDER) 
-                                            as 
-                                        x ON 
-                                        friendlist.sender = x.sender 
-                                        and friendlist.lastupdatedate = max 
-                                        JOIN account ON friendlist.sender = account.id
-                                        where friendlist.state = 'pending';`,
+                    client.query(`SELECT 
+                    account.fname, 
+                    account.lname, 
+                    account.username
+                FROM (SELECT 
+                    recipient as id, 
+                    max(lastupdatedate)
+                FROM 
+                    friendlist
+                WHERE 
+                    sender =$1 
+                GROUP BY 
+                    recipient 
+                UNION 
+                SELECT 
+                    sender as id, 
+                    max(lastupdatedate)
+                FROM 
+                    friendlist 
+                WHERE 
+                    recipient = $1 
+                GROUP BY 
+                    sender) as y
+                JOIN
+                    friendlist
+                ON
+                    y.max = friendlist.lastupdatedate
+                JOIN 
+                    account
+                ON
+                    friendlist.recipient = account.id
+                WHERE 
+                    account.id != $1
+                AND 
+                    friendlist.state = 'pending'
+                AND account.active = true;`,
                             [req.params.accountId],
                             (err,rows)=>{
                                 if(!err){
