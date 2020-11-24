@@ -126,7 +126,7 @@ exports.init = (app) => {
                                                 $4,
                                                 current_timestamp
                                             );
-                                        `, [rows.rows[0].accountid, rows.rows[0].eventid, v4(), req.body.type ?  req.body.type: 'none'],
+                                        `, [req.body.accountId, rows.rows[0].eventid, v4(), req.body.type ?  req.body.type: 'none'],
                                             (err2,row2) => {
                                                 if(err2){
                                                     console.log(err2);
