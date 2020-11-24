@@ -293,6 +293,8 @@ exports.init = (app) => {
                                     event.date
                                 BETWEEN
                                     NOW() - INTERVAL '48 HOURS' and NOW()
+                                AND
+                                    a.active = true
                                 ORDER BY
                                     event.date
                                 DESC;`,
