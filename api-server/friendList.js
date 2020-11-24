@@ -248,11 +248,11 @@ exports.init = function(app){
                                     ON
                                         y.max = friendlist.lastupdatedate
                                     JOIN 
-                                        (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdate) FROM account as a2 WHERE a2.id = a1.id)) as a
+                                        (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
                                     ON 
-                                        friendlist.sender = account.id
+                                        friendlist.sender = a.id
                                     OR
-                                        friendlist.recipient = account.id
+                                        friendlist.recipient = a.id
                                     WHERE 
                                         a.id != $1
                                     AND 
