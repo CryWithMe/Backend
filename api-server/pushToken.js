@@ -224,7 +224,7 @@ exports.init = (app) => {
                                     a.id != $1
                                 AND 
                                     friendlist.state = 'accepted'
-                                AND a.active = true) as friends
+                                AND a.active = true DISTINCT) as friends
                 JOIN
                     event
                 ON 
@@ -254,4 +254,7 @@ exports.init = (app) => {
             })
         }
     })
+
+
+    
 }
