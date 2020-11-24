@@ -259,7 +259,7 @@ exports.init = (app) => {
     app.get("/eventResponses/:accountId", (req,res)=> {
         if(req.body.accountId){
             pool.connect((err,client,release)=>{
-                if(err){res.sendStatus(500)}
+                if(err){res.sendStatus(400)}
                 else{
                     client.query(`SELECT 
                                     a.account,
