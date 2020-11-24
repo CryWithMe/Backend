@@ -257,7 +257,7 @@ exports.init = (app) => {
 
 
     app.get("/eventResponses/:accountId", (req,res)=> {
-        if(req.body.accountId){
+        if(req.params.accountId){
             pool.connect((err,client,release)=>{
                 if(err){res.sendStatus(400)}
                 else{

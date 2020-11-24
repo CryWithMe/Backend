@@ -26,7 +26,7 @@ CREATE TABLE FriendList(
 CREATE TABLE Event(
     sender VARCHAR(36),
     eventID VARCHAR(36),
-    type VARCHAR(20),
+    type TEXT,
     date TIMESTAMP
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE Response(
     responder VARCHAR(36),
     eventID VARCHAR(36),
     responseID VARCHAR(36),
-    type VARCHAR(36),
+    type TEXT,
     date TIMESTAMP
 );
 
