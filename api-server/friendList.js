@@ -220,9 +220,9 @@ exports.init = function(app){
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT 
-                                        account.fname, 
-                                        account.lname, 
-                                        account.username
+                                        a.fname, 
+                                        a.lname, 
+                                        a.username
                                     FROM (SELECT 
                                         recipient as id, 
                                         max(lastupdatedate)
@@ -247,16 +247,16 @@ exports.init = function(app){
                                     ON
                                         y.max = friendlist.lastupdatedate
                                     JOIN 
-                                        account
+                                        (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdate) FROM account as a2 WHERE a2.id = a1.id)) as a
                                     ON 
                                         friendlist.sender = account.id
                                     OR
                                         friendlist.recipient = account.id
                                     WHERE 
-                                        account.id != $1
+                                        a.id != $1
                                     AND 
                                         friendlist.state = 'accepted'
-                                    AND account.active = true;`,
+                                    AND a.active = true;`,
                                     [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
