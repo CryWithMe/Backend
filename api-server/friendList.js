@@ -31,14 +31,14 @@ exports.init = function(app){
                                             //Checking if account exists and is active
                                             else if(result.rows[0] && result.rows[0].id != req.body.accountId && result.rows[0].active){
                                                 
-                                                client.query(`SELECT * FROM friendlist WHERE friendlist.sender = $1 AND friendlist.recipient = $2 OR friendlist.sender=$2 AND freindslist.recipeint=$2 ORDER BY friendlist.lastupdatedate DESC LIMIT 1;`,
-                                                        [res.body.accountId,result.rows[0].id],
+                                                client.query(`SELECT * FROM friendlist WHERE friendlist.sender = $1 AND friendlist.recipient = $2 OR friendlist.sender=$2 AND friendlist.recipient=$2 ORDER BY friendlist.lastupdatedate DESC LIMIT 1;`,
+                                                        [req.body.accountId,result.rows[0].id],
                                                         (error2, result2)=>{
                                                     //Inserting into friends list
+						    console.log(result2);
                                                     if(error2){
                                                         console.log(error2);
-                                                    }
-                                                    if(result2.rowCount <1 || result2.rows[0].status != 'active'){
+                                                    }else if(result2.rowCount <1 || result2.rows[0].status != 'active'){
                                                     client.query("INSERT INTO friendlist(sender,recipient,state, lastupdatedate) VALUES($1, $2, 'pending', current_timestamp);", [req.body.accountId, result.rows[0].id],
                                                     (err, result)=>{
                                                         //If error, server is sad

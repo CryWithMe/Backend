@@ -32,7 +32,7 @@ app.use(cors({
 
 const logger = log({ label: 'user-service' , console: true, file: true });
 
-app.use(ExpressAPILogMiddleware(logger, { request: true }));
+//app.use(ExpressAPILogMiddleware(logger, { request: true }));
 
 app.get("/", function(req,res){
     res.status(200).send("Cry With Me API is up and running");
