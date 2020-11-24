@@ -160,41 +160,71 @@ exports.init = (app) => {
                     event.date 
                 FROM
                     (SELECT 
-                        account.id
-                        FROM (SELECT 
-                            recipient as id, 
-                            max(lastupdatedate)
-                        FROM 
-                            friendlist
-                        WHERE 
-                            sender =$1 
-                        GROUP BY 
-                            recipient 
-                        UNION 
+                        a.id
+                    FROM ( 
                         SELECT 
-                            sender as id, 
-                            max(lastupdatedate)
-                        FROM 
-                            friendlist 
+                            b1.*
+                        FROM(
+                            SELECT 
+                                recipient as id, 
+                                max(lastupdatedate)
+                            FROM 
+                                friendlist
+                            WHERE 
+                                sender =$1
+                            GROUP BY 
+                                recipient 
+                            UNION
+                            SELECT 
+                                sender as id, 
+                                max(lastupdatedate)
+                            FROM 
+                                friendlist 
+                            WHERE 
+                                recipient = $1
+                            GROUP BY 
+                                sender
+                            ) as b1 
                         WHERE 
-                            recipient = $1 
-                        GROUP BY 
-                            sender) as y
-                        JOIN
-                            friendlist
-                        ON
-                            y.max = friendlist.lastupdatedate
-                        JOIN 
-                            account
-                        ON 
-                            friendlist.sender = account.id
-                        OR
-                            friendlist.recipient = account.id
-                        WHERE 
-                            account.id != $1
-                        AND 
-                            friendlist.state = 'accepted'
-                        AND account.active = true) as friends
+                            b1.max=(
+                            SELECT 
+                                MAX(b2.max) 
+                                FROM (
+                                    SELECT 
+                                        recipient as id, 
+                                        max(lastupdatedate)
+                                    FROM 
+                                        friendlist
+                                    WHERE 
+                                        sender =$1
+                                    GROUP BY 
+                                        recipient 
+                                    UNION 
+                                    SELECT 
+                                        sender as id, 
+                                        max(lastupdatedate)
+                                    FROM 
+                                        friendlist 
+                                    WHERE 
+                                        recipient = $1
+                                    GROUP BY 
+                                        sender
+                                ) as b2 where b1.id = b2.id)) as y
+                                JOIN
+                                    friendlist
+                                ON
+                                    y.max = friendlist.lastupdatedate
+                                JOIN 
+                                    (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
+                                ON 
+                                    friendlist.sender = a.id
+                                OR
+                                    friendlist.recipient = a.id
+                                WHERE 
+                                    a.id != $1
+                                AND 
+                                    friendlist.state = 'accepted'
+                                AND a.active = true) as friends
                 JOIN
                     event
                 ON 
