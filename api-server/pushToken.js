@@ -154,7 +154,7 @@ exports.init = (app) => {
                     res.sendStatus(500)
                 } else{
                     client.query(`
-                SELECT
+                SELECT DISTINCT
                     account.username,
                     event.type, 
                     event.date 
@@ -224,7 +224,7 @@ exports.init = (app) => {
                                     a.id != $1
                                 AND 
                                     friendlist.state = 'accepted'
-                                AND a.active = true DISTINCT) as friends
+                                AND a.active = true) as friends
                 JOIN
                     event
                 ON 
