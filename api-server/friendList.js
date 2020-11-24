@@ -103,13 +103,13 @@ exports.init = function(app){
                 ON
                     y.max = friendlist.lastupdatedate
                 JOIN 
-                    (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdate) FROM account as a2 WHERE a2.id = a1.id)) as a
+                    (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
                 ON 
                     friendlist.sender = a.id
                 OR
                     friendlist.recipient = a.id
                 WHERE 
-                    account.id != $1
+                    a.id != $1
                 AND 
                     friendlist.state = 'pending'
                 AND 
@@ -120,6 +120,7 @@ exports.init = function(app){
                                 if(!err){
                                     res.send(rows);
                                 } else {
+				    console.log(err);
                                     res.sendStatus(400);
                                 }
                             })
