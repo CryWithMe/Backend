@@ -317,8 +317,6 @@ exports.init = function(app){
                                 a.id != $1
                             AND 
                                 friendlist.state = 'accepted'
-                            AND 
-                                friendlist.recipient = $1
                             AND a.active = true;`,
                                     [req.params.accountId],
                                     (err,rows)=>{
