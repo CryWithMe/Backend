@@ -79,42 +79,72 @@ exports.init = function(app){
                     a.fname, 
                     a.lname, 
                     a.username
-                FROM (SELECT 
-                    recipient as id, 
-                    max(lastupdatedate)
-                FROM 
-                    friendlist
-                WHERE 
-                    sender =$1 
-                GROUP BY 
-                    recipient 
-                UNION 
-                SELECT 
-                    sender as id, 
-                    max(lastupdatedate)
-                FROM 
-                    friendlist 
-                WHERE 
-                    recipient = $1 
-                GROUP BY 
-                    sender) as y
-                JOIN
-                    friendlist
-                ON
-                    y.max = friendlist.lastupdatedate
-                JOIN 
-                    (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
-                ON 
-                    friendlist.sender = a.id
-                OR
-                    friendlist.recipient = a.id
-                WHERE 
-                    a.id != $1
-                AND 
-                    friendlist.state = 'pending'
-                AND 
-                    friendlist.recipient = $1
-                AND a.active = true`,
+                FROM ( 
+                    SELECT 
+                        b1.*
+                    FROM(
+                        SELECT 
+                            recipient as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist
+                        WHERE 
+                            sender =$1
+                        GROUP BY 
+                            recipient 
+                        UNION
+                        SELECT 
+                            sender as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist 
+                        WHERE 
+                            recipient = $1
+                        GROUP BY 
+                            sender
+                        ) as b1 
+                    WHERE 
+                        b1.max=(
+                        SELECT 
+                            MAX(b2.max) 
+                            FROM (
+                                SELECT 
+                                    recipient as id, 
+                                    max(lastupdatedate)
+                                FROM 
+                                    friendlist
+                                WHERE 
+                                    sender =$1
+                                GROUP BY 
+                                    recipient 
+                                UNION 
+                                SELECT 
+                                    sender as id, 
+                                    max(lastupdatedate)
+                                FROM 
+                                    friendlist 
+                                WHERE 
+                                    recipient = $1
+                                GROUP BY 
+                                    sender
+                            ) as b2 where b1.id = b2.id)) as y
+                            JOIN
+                                friendlist
+                            ON
+                                y.max = friendlist.lastupdatedate
+                            JOIN 
+                                (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
+                            ON 
+                                friendlist.sender = a.id
+                            OR
+                                friendlist.recipient = a.id
+                            WHERE 
+                                a.id != $1
+                            AND 
+                                friendlist.state = 'pending'
+                            AND 
+                                friendlist.recipient = $1
+                            AND a.active = true;`,
                             [req.params.accountId],
                             (err,rows)=>{
                                 if(!err){
@@ -221,43 +251,75 @@ exports.init = function(app){
             pool.connect((err,client,release) => {
                 if(!err){
                     client.query(`SELECT 
-                                        a.fname, 
-                                        a.lname, 
-                                        a.username
-                                    FROM (SELECT 
-                                        recipient as id, 
-                                        max(lastupdatedate)
-                                    FROM 
-                                        friendlist
-                                    WHERE 
-                                        sender =$1 
-                                    GROUP BY 
-                                        recipient 
-                                    UNION 
-                                    SELECT 
-                                        sender as id, 
-                                        max(lastupdatedate)
-                                    FROM 
-                                        friendlist 
-                                    WHERE 
-                                        recipient = $1 
-                                    GROUP BY 
-                                        sender) as y
-                                    JOIN
-                                        friendlist
-                                    ON
-                                        y.max = friendlist.lastupdatedate
-                                    JOIN 
-                                        (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
-                                    ON 
-                                        friendlist.sender = a.id and a.id != y.id
-                                    OR
-                                        friendlist.recipient = a.id and a.id != y.id
-                                    WHERE 
-                                        a.id != $1
-                                    AND 
-                                        friendlist.state = 'accepted'
-                                    AND a.active = true;`,
+                    a.fname, 
+                    a.lname, 
+                    a.username
+                FROM ( 
+                    SELECT 
+                        b1.*
+                    FROM(
+                        SELECT 
+                            recipient as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist
+                        WHERE 
+                            sender =$1
+                        GROUP BY 
+                            recipient 
+                        UNION
+                        SELECT 
+                            sender as id, 
+                            max(lastupdatedate)
+                        FROM 
+                            friendlist 
+                        WHERE 
+                            recipient = $1
+                        GROUP BY 
+                            sender
+                        ) as b1 
+                    WHERE 
+                        b1.max=(
+                        SELECT 
+                            MAX(b2.max) 
+                            FROM (
+                                SELECT 
+                                    recipient as id, 
+                                    max(lastupdatedate)
+                                FROM 
+                                    friendlist
+                                WHERE 
+                                    sender =$1
+                                GROUP BY 
+                                    recipient 
+                                UNION 
+                                SELECT 
+                                    sender as id, 
+                                    max(lastupdatedate)
+                                FROM 
+                                    friendlist 
+                                WHERE 
+                                    recipient = $1
+                                GROUP BY 
+                                    sender
+                            ) as b2 where b1.id = b2.id)) as y
+                            JOIN
+                                friendlist
+                            ON
+                                y.max = friendlist.lastupdatedate
+                            JOIN 
+                                (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdatedate) FROM account as a2 WHERE a2.id = a1.id)) as a
+                            ON 
+                                friendlist.sender = a.id
+                            OR
+                                friendlist.recipient = a.id
+                            WHERE 
+                                a.id != $1
+                            AND 
+                                friendlist.state = 'accepted'
+                            AND 
+                                friendlist.recipient = $1
+                            AND a.active = true;`,
                                     [req.params.accountId],
                                     (err,rows)=>{
                                         if(err) {
