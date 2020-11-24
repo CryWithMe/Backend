@@ -262,7 +262,7 @@ exports.init = (app) => {
                 if(err){res.sendStatus(400)}
                 else{
                     client.query(`SELECT 
-                                    a.account,
+                                    a.username,
                                     a.fname,
                                     a.lname,
                                     response.type
