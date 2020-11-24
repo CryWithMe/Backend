@@ -295,7 +295,7 @@ exports.init = (app) => {
                                     NOW() - INTERVAL '48 HOURS' and NOW()
                                 ORDER BY
                                     event.date
-                                DESC;`
+                                DESC;`,
                                 [req.params.accountId],
                                 (err,rows)=>{
                                     if(err){
