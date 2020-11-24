@@ -76,9 +76,9 @@ exports.init = function(app){
 
                     //See if the most recent row of the sender and recipient is pending, really complicated but makes sense
                     client.query(`SELECT 
-                    account.fname, 
-                    account.lname, 
-                    account.username
+                    a.fname, 
+                    a.lname, 
+                    a.username
                 FROM (SELECT 
                     recipient as id, 
                     max(lastupdatedate)
@@ -103,18 +103,18 @@ exports.init = function(app){
                 ON
                     y.max = friendlist.lastupdatedate
                 JOIN 
-                    account
+                    (SELECT a1.* FROM account as a1 WHERE a1.lastupdatedate=(SELECT MAX(a2.lastupdate) FROM account as a2 WHERE a2.id = a1.id)) as a
                 ON 
-                    friendlist.sender = account.id
+                    friendlist.sender = a.id
                 OR
-                    friendlist.recipient = account.id
+                    friendlist.recipient = a.id
                 WHERE 
                     account.id != $1
                 AND 
                     friendlist.state = 'pending'
                 AND 
                     friendlist.recipient = $1
-                AND account.active = true`,
+                AND a.active = true`,
                             [req.params.accountId],
                             (err,rows)=>{
                                 if(!err){
