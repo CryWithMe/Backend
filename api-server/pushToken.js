@@ -179,7 +179,7 @@ exports.init = (app) => {
                                 sender as id, 
                                 max(lastupdatedate)
                             FROM 
-                                friendlist 
+                                friendlist
                             WHERE 
                                 recipient = $1
                             GROUP BY 
@@ -256,5 +256,60 @@ exports.init = (app) => {
     })
 
 
+    app.get("/eventResponses/:accountId", (req,res)=> {
+        if(req.body.accountId){
+            pool.connect((err,client,release)=>{
+                if(err){res.sendStatus(500)}
+                else{
+                    client.query(`SELECT 
+                                    a.account,
+                                    a.fname,
+                                    a.lname,
+                                    response.type
+                                FROM(
+                                    SELECT 
+                                        a1.* 
+                                    FROM 
+                                        account as a1 
+                                    WHERE 
+                                        a1.lastupdatedate=(
+                                            SELECT 
+                                                MAX(a2.lastupdatedate)
+                                            FROM
+                                                account as a2 
+                                            WHERE a2.id = a1.id)
+                                    ) as a
+                                JOIN
+                                    response
+                                ON
+                                    response.responder =a.id
+                                JOIN
+                                    event
+                                ON
+                                    event.eventid = response.eventid
+                                WHERE
+                                    event.sender = $1
+                                AND
+                                    event.date
+                                BETWEEN
+                                    NOW() - INTERVAL '48 HOURS' and NOW()
+                                ORDER BY
+                                    event.date
+                                DESC;`
+                                [req.params.accountId],
+                                (err,rows)=>{
+                                    if(err){
+                                        console.log(err);
+                                        res.sendStatus(500);
+                                    }else{
+                                        res.status(200).send(rows);
+                                    }
+                                })
+                    
+                }
+                release();
+            })
+        }
+    })
     
 }
