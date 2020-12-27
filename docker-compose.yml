@@ -18,6 +18,7 @@ services:
             - PGDATABASE=${PGDATABASE}
             - PGPASSWORD=${PGPASSWORD}
             - PGADDRESS=${PGADDRESS}
+        command: npm start
     redis:
         build: ./redis/
 
