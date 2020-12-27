@@ -28,7 +28,7 @@ exports.init = function(app){
                     release();
                 }else {
                     //Seeing if username is present and is active
-                    client.query("SELECT salt, hash, account.id, account.active FROM account JOIN login on account.id = login.accountid where account.username =$1 ORDER BY login.lastupdatedate DESC LIMIT 1;", [req.body.username],
+                    client.query("SELECT * FROM verifyLogin($1);", [req.body.username],
                             (err,result) => {
                                 if(err){
                                     console.log(err);

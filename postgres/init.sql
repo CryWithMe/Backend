@@ -9,12 +9,46 @@ CREATE TABLE Account(
     active BOOLEAN
 );
 
+
 CREATE TABLE Login(
     accountId varchar(36),
     salt varchar(32),
     hash varchar(64),
     lastUpdateDate TIMESTAMP
 );
+
+---Verify Login---
+-- Takes a username and returns the salt and hash of the user ---
+CREATE function verifyLogin (
+   input VARCHAR(20)
+) 
+    returns table (
+        salt VARCHAR(32),
+        hash VARCHAR(64),
+        id VARCHAR(36),
+        active BOOLEAN
+    )
+    language plpgsql
+as $$
+begin
+    return query
+        SELECT 
+            login.salt, 
+            login.hash, 
+            account.id, 
+            account.active 
+        FROM 
+            account 
+        JOIN 
+            login 
+        ON
+            account.id = login.accountid 
+        WHERE 
+            account.username = input 
+        ORDER BY 
+            login.lastupdatedate 
+        DESC LIMIT 1;
+end; $$;
 
 CREATE TABLE FriendList(
     sender VARCHAR(36),
@@ -70,4 +104,4 @@ CREATE TABLE Comforts(
     condition TEXT,
     active BOOLEAN,
     lastUpdateDate TIMESTAMP
-) 
+)
