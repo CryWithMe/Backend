@@ -62,7 +62,7 @@ exports.init = function(app){
                 if(err){
                     res.sendStatus(500);
                 } else {
-                    client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [req.body.accountId, salt,hash], (err,result)=>{
+                    client.query("SELECT * FROM changePassword($1,$2,$3);", [req.body.accountId, salt,hash], (err,result)=>{
                         if(err){
                             res.sendStatus(500);
                         } else {
@@ -85,65 +85,32 @@ exports.init = function(app){
         //Checking if data exists
         if(!req.body.username || !req.body.password || !req.body.email || !req.body.fname || !req.body.lname){
             res.sendStatus(401);
-        }
-        else {
-        //Getting Connection
-            pool.connect((err,client,release) => {
+        } else {
+            pool.connect((err,client,release)=>{
                 if(err){
-                    console.log(err);
-                    res.send(400)
-                }
-                
-                //Seeing if username is present
-                client.query("SELECT id FROM ACCOUNT WHERE username = $1", [req.body.username], (err,result)=>{
-                    
-                    if(err){
-                        console.log(err);
-                        res.status(400).send("User Exists");
-                    }
-                    //If username is not taken
-                    if(result.rowCount == 0){
-                        salt = encryption.getSalt();
-                        hash = encryption.getHash(salt, req.body.password);
-                        
-                        //Generating unique account ID
-                        accountId = v4();
-                        
-                        //Insert into Account DB
-                        client.query("INSERT INTO ACCOUNT(id, username, lastUpdateDate, fname, lname, email, active) VALUES ($1,$2,current_timestamp, $3, $4, $5, 'true');", [accountId, req.body.username, req.body.fname, req.body.lname, req.body.email], (err,result)=>{
-                            if(err){
-                                console.log(err);
-                                res.send(400);
-                            }
-                            else{
-                                
-                                //Insert into login info
-                                client.query("INSERT INTO Login(accountId, salt,hash, lastUpdateDate) VALUES ($1,$2,$3, current_timestamp);", [accountId, salt,hash], (err,result)=>{
-                                    
+                    res.sendStatus(500);
+                }else{
+                    salt = encryption.getSalt();
+                    hash = encryption.getHash(salt, req.body.newPassword);
+                    client.query("SELECT * FROM createAccount($1,$2,$3,$4,$5,$6,$7);",
+                                [v4(),req.body.username, req.body.fname, req.body.lname, req.body.email, salt, hash],
+                                (err,rows)=>{
                                     if(err){
-                                        console.log(err);
-                                        res.sendStatus(400)
-                                    } else{
-                                        
-                                     
-                                        
-                                        res.status(200).send(accountId);
+                                        res.sendStatus(500);
+                                    } else {
+                                        console.log(rows.rows);
+                                        if(rows.rows[0].createaccount){
+                                            res.sendStatus(200);
+                                        }else{
+                                            res.status(400).send("Username Taken");
+                                        }
                                     }
-                                    release()
-                                });
-                            }
-                        });
-
-                    }else {
-                        res.sendStatus(401);
-                        release();
-                    }
-                    
-
-                });
-            })};
-
-        });
+                                })
+                }
+                release();
+            })
+        }
+    });
 
     //Deletes account
     //Returns 200 if account exists and is deletable

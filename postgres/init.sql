@@ -50,6 +50,81 @@ begin
         DESC LIMIT 1;
 end; $$;
 
+--Change Password--
+CREATE function changePassword(
+    newAccountId VARCHAR(36),
+    newSalt VARCHAR(32),
+    newHash VARCHAR(64)
+) returns 
+    VOID
+language plpgsql
+as $$
+    BEGIN
+        INSERT INTO LOGIN(accountId, salt, hash, lastUpdateDate) VALUES(newAccountId,newSalt,newHash,current_timestamp);
+    END;
+$$;
+
+
+---Create Account---
+---Takes a id,username, salt, hash, email, fname, and lname
+CREATE function createAccount(
+    newAccountId VARCHAR(36),
+    newUsername VARCHAR(20),
+    newFName VARCHAR(30),
+    newLName VARCHAR(30),
+    newEmail VARCHAR(320),
+    newSalt VARCHAR(32),
+    newHash VARCHAR(32)
+) returns 
+    BOOLEAN
+language 
+    plpgsql
+as $$
+    BEGIN 
+        IF NOT EXISTS
+            ---Seeing if username exists---
+            (SELECT 
+                id 
+            FROM 
+                account
+            WHERE 
+                username=newUsername
+            ) 
+        THEN
+            INSERT INTO ACCOUNT
+                (id, 
+                username,
+                lastUpdateDate,
+                fname,
+                lname,
+                email,
+                active) 
+            VALUES
+                (newAccountId,
+                newUsername,
+                current_timestamp,
+                newFName,
+                newLName,
+                newEmail,
+                'true');
+            INSERT INTO LOGIN(
+                accountid,
+                salt,
+                hash,
+                lastUpdateDate
+            ) VALUES(
+                newAccountId,
+                newSalt,
+                newHash,
+                current_timestamp
+            );
+            RETURN 'true';
+        ELSE
+            RETURN 'false';
+        end if;
+    END
+$$;
+
 CREATE TABLE FriendList(
     sender VARCHAR(36),
     recipient VARCHAR(36),
